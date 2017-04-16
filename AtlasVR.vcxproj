@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1E0FBFC8-6D04-4F70-AAF7-CDE96990B1EB}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Fractals</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)\include\sdl2-2.0.3\include;$(SolutionDir)\include\openvr;$(ProjectDir)\native_file_dialog\src\include;$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)\include\sdl2-2.0.3\include;$(SolutionDir)\include\openvr;$(ProjectDir)\native_file_dialog\src\include;$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib;$(LibraryPath);$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>FREEGLUT_LIB_PRAGMAS=0;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;openvr_api.lib;assimp.lib;FreeImage.lib;glu32.lib;freeglut.lib;opengl32.lib;glew32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>SDL2.lib;openvr_api.lib;assimp.lib;FreeImage.lib;glew32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AABB.cpp" />
+    <ClCompile Include="AtlasVR.cpp" />
+    <ClCompile Include="AtlasVRGui.cpp" />
+    <ClCompile Include="brain_hierarchy.cpp" />
+    <ClCompile Include="CGLRenderModel.cpp" />
+    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="ControllerSpline.cpp" />
+    <ClCompile Include="Cube.cpp" />
+    <ClCompile Include="file_io.cpp" />
+    <ClCompile Include="glUtils.cpp" />
+    <ClCompile Include="HelpImage.cpp" />
+    <ClCompile Include="Labels.cpp" />
+    <ClCompile Include="TrackedCamera.cpp" />
+    <ClCompile Include="Tutorial.cpp" />
+    <ClCompile Include="Views.cpp" />
+    <ClCompile Include="vr_callbacks.cpp" />
+    <ClCompile Include="imgui_draw_3d.cpp" />
+    <ClCompile Include="imgui_impl_vr.cpp" />
+    <ClCompile Include="include\imgui\imgui.cpp" />
+    <ClCompile Include="include\imgui\imgui_demo.cpp" />
+    <ClCompile Include="include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="InitShader.cpp" />
+    <ClCompile Include="LoadMesh.cpp" />
+    <ClCompile Include="LoadTexture.cpp" />
+    <ClCompile Include="BuildTree.cpp" />
+    <ClCompile Include="SDL_vr_main.cpp" />
+    <ClCompile Include="shared\Matrices.cpp" />
+    <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="tree.cpp" />
+    <ClCompile Include="uniforms.cpp" />
+    <ClCompile Include="VirtualTrackball.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fImages.glsl" />
+    <None Include="flabels.glsl" />
+    <None Include="flines.glsl" />
+    <None Include="fshader.glsl" />
+    <None Include="gshader.glsl" />
+    <None Include="vImages.glsl" />
+    <None Include="vlabels.glsl" />
+    <None Include="vlines.glsl" />
+    <None Include="vshader.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AABB.h" />
+    <ClInclude Include="AtlasVRGui.h" />
+    <ClInclude Include="AtlasVR.h" />
+    <ClInclude Include="CGLRenderModel.h" />
+    <ClInclude Include="Color.h" />
+    <ClInclude Include="ControllerSpline.h" />
+    <ClInclude Include="Cube.h" />
+    <ClInclude Include="file_io.h" />
+    <ClInclude Include="glUtils.h" />
+    <ClInclude Include="HelpImage.h" />
+    <ClInclude Include="Labels.h" />
+    <ClInclude Include="TrackedCamera.h" />
+    <ClInclude Include="Tutorial.h" />
+    <ClInclude Include="Views.h" />
+    <ClInclude Include="vr_callbacks.h" />
+    <ClInclude Include="brain_hierarchy.h" />
+    <ClInclude Include="imgui_draw_3d.h" />
+    <ClInclude Include="imgui_impl_vr.h" />
+    <ClInclude Include="LoadMesh.h" />
+    <ClInclude Include="LoadTexture.h" />
+    <ClInclude Include="native_file_dialog\src\common.h" />
+    <ClInclude Include="BuildTree.h" />
+    <ClInclude Include="shared\Matrices.h" />
+    <ClInclude Include="shared\Vectors.h" />
+    <ClInclude Include="Transform.h" />
+    <ClInclude Include="tree.h" />
+    <ClInclude Include="uniforms.h" />
+    <ClInclude Include="VirtualTrackball.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
