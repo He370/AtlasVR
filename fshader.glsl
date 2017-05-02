@@ -51,6 +51,7 @@ uniform float slider[5];
 uniform float selectedEdge;
 uniform int selected_slab;
 uniform bool green_screen = false;
+uniform int section_id = 0;
 
 in vec4 f_tex_coord;
 in vec4 f_pos;
@@ -140,7 +141,7 @@ void main(void)
 
    if(pass == 6) //picking
    {
-      fragcolor = vec4(float(id)/255.0, 1.0, 1.0, 1.0);
+      fragcolor = vec4(float(id)/255.0, float(section_id)/255.0, 1.0, 1.0);
       return;
    }
 

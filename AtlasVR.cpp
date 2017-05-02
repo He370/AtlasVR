@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <set>
 
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -36,6 +37,7 @@
 #include "HelpImage.h"
 #include "Labels.h"
 #include "Tutorial.h"
+#include "RenderSections.h"
 
 extern Tutorial* pTutorial;
 
@@ -122,6 +124,19 @@ glm::mat4 Ml = glm::scale(glm::vec3(1.0f));
 
 ControllerSpline slab_spl(n_manip_slabs);
 ControllerSpline* pMesh_spl = nullptr;
+
+// TEMP debug
+
+float temp_location_x = -6.0f;
+float temp_location_y = 6.0f;
+//float temp_location_y = 1.0f;
+float temp_location_z = -6.0f;
+float temp_level_distance = 2.0f;
+
+// TEMP end
+
+//Render Mesh models for each Section
+RenderSections renderSections;
 
 
 void LoadAALScene();
@@ -308,6 +323,18 @@ void DrawPass3()
    glm::mat4 Rscene = T1*pSceneMeshRotation->getAccumRotationMatrix()*T0;
    if(hide_scene_meshes == false)
    {
+	   for (auto &model : model_data)
+	   {
+		   if (model.hidden == false && model.model_uniforms.instances == 1)
+		   {
+			   if (model.model_uniforms.selected == true) {
+				   SelectedHemisphereIDs.insert(model.hemisphere);
+				   SelectedLobeIDs.insert(model.lobe);
+				   SelectedRegionIDs.insert(model.region);
+			   }
+		   }
+	   }
+
       //draw scene meshes
       for (auto &model : model_data) 
       {
@@ -315,6 +342,7 @@ void DrawPass3()
          {
             glm::mat4 X = getModelGlobalMatrix(model);
 
+			/*
             int id = -1;
             glm::vec3 cen;
             switch (select_mode)
@@ -343,14 +371,66 @@ void DrawPass3()
             {
                X = X*glm::scale(glm::vec3(1.0 + 0.01f*sin(5.0f*PassUniformData.time)));
             }
+			*/
 
+			glm::mat4 T_hemisphere = glm::translate(glm::vec3(0.0f, -temp_level_distance, 0.0f));
+			glm::mat4 T_lobe = glm::translate(glm::vec3(0.0f, -2.0f*temp_level_distance, 0.0f));
+			glm::mat4 T_region = glm::translate(glm::vec3(0.0f, -3.0f*temp_level_distance, 0.0f));
+
+			glm::mat4 S_hemisphere = glm::scale(glm::vec3(1.0f));
+			glm::mat4 S_lobe = glm::scale(glm::vec3(1.5f));
+			glm::mat4 S_region = glm::scale(glm::vec3(2.0f));
+
+			//model.model_uniforms.ka = BrainColor;
+			//model.model_uniforms.kd = model.model_uniforms.ka;
             model.model_uniforms.M = S*X*Rscene;
             glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ModelUniformData), &model.model_uniforms);
 
             glBindVertexArray(model.mesh_data.mVao);
             glDrawElements(GL_TRIANGLES, model.mesh_data.mNumIndices, GL_UNSIGNED_INT, 0);
+
+			/*
+			//hemisphere selected
+			if (SelectedHemisphereIDs.find(model.hemisphere) != SelectedHemisphereIDs.end()) {
+				int h = model.hemisphere;
+				model.model_uniforms.ka = HemisphereColors[h];
+				model.model_uniforms.kd = model.model_uniforms.ka;
+				model.model_uniforms.M = S*T_hemisphere*X*Rscene;
+				glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ModelUniformData), &model.model_uniforms);
+				glBindVertexArray(model.mesh_data.mVao);
+				glDrawElements(GL_TRIANGLES, model.mesh_data.mNumIndices, GL_UNSIGNED_INT, 0);
+			}
+
+			//lobe selected
+			if (SelectedLobeIDs.find(model.lobe) != SelectedLobeIDs.end()) {
+				int l = model.lobe;
+				model.model_uniforms.ka = LobeColors[l];
+				model.model_uniforms.kd = model.model_uniforms.ka;
+				model.model_uniforms.M = S*T_lobe*X*Rscene;
+				glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ModelUniformData), &model.model_uniforms);
+				glBindVertexArray(model.mesh_data.mVao);
+				glDrawElements(GL_TRIANGLES, model.mesh_data.mNumIndices, GL_UNSIGNED_INT, 0);
+			}
+
+			//region selected
+			if (SelectedRegionIDs.find(model.region) != SelectedRegionIDs.end()) {
+				int region = model.region;
+				model.model_uniforms.ka = RegionColors[region];
+				model.model_uniforms.kd = model.model_uniforms.ka;
+				model.model_uniforms.M = S*T_region*X*Rscene;
+				glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ModelUniformData), &model.model_uniforms);
+				glBindVertexArray(model.mesh_data.mVao);
+				glDrawElements(GL_TRIANGLES, model.mesh_data.mNumIndices, GL_UNSIGNED_INT, 0);
+			}
+
+			set_select_mode_colors();
+			*/
          }
       }
+
+	  SelectedHemisphereIDs.clear();
+	  SelectedLobeIDs.clear();
+	  SelectedRegionIDs.clear();
    }
 
    //draw selected meshes
@@ -442,25 +522,42 @@ void DrawPass3()
       V[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
       glm::mat4 Vc = glm::inverse(M0)*V*M0;
 
-      for (auto &model : model_data)
+	  //section Node stores the model matrixes of selected meshes
+	  SectionNode* curNode;
+	  if (renderSections.b_push_mode == true) {
+		  curNode = new SectionNode;
+		  curNode->select_mode = select_mode;
+		  curNode->v_model_matrixs = new vector<glm::mat4>;
+		  curNode->v_model_matrixs->resize(model_data.size());
+		  curNode->v_model_selected = new vector<bool>;
+		  curNode->v_model_selected->resize(model_data.size());
+		  curNode->v_model_IDs = new vector<int>;
+		  curNode->v_model_IDs->resize(model_data.size());
+
+		  curNode->select_mode = select_mode;
+		  curNode->ID = RenderSections::ID;
+		  RenderSections::ID+=1;
+	  }
+
+      for (int i=0; i<model_data.size();i++)
       {
-         if (model.model_uniforms.selected == true)
+         if (model_data[i].model_uniforms.selected == true)
          {
 
             float u0 = 0.5f;
             if (select_mode == SelectMode::Region)
             {
-               int region = model.region;
+               int region = model_data[i].region;
                u0 = nu[region];
             }
             else if (select_mode == SelectMode::Lobe)
             {
-               int lobe = model.lobe;
+               int lobe = model_data[i].lobe;
                u0 = nu[lobe];
             }
             else if (select_mode == SelectMode::Hemisphere)
             {
-               int hemi = model.hemisphere;
+               int hemi = model_data[i].hemisphere;
                u0 = u0 = nu[hemi];
             }
             else if (select_mode == SelectMode::Brain)
@@ -496,21 +593,47 @@ void DrawPass3()
             //Pop = glm::mix(Pop, glm::scale(vec3(1.0f)), w);
             //model.model_uniforms.M = offset*Minterp*Pop*S2*T*V*S*M0;
 
-            model.model_uniforms.M = offset*Minterp*S2*T*V*S*M0;
+			model_data[i].model_uniforms.M = offset*Minterp*S2*T*V*S*M0;
 
-            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ModelUniformData), &model.model_uniforms);
+			if (renderSections.b_push_mode == true) {
+				(*curNode->v_model_matrixs)[i] = model_data[i].model_uniforms.M;
+				(*curNode->v_model_selected)[i] = true;
+				(*curNode->v_model_IDs)[i] = 0;
+				if (select_mode == SelectMode::Region)
+				{
+					(*curNode->v_model_IDs)[i] = model_data[i].region;
+				}
+				else if (select_mode == SelectMode::Lobe)
+				{
+					(*curNode->v_model_IDs)[i] = model_data[i].lobe;
+				}
+				else if (select_mode == SelectMode::Hemisphere)
+				{
+					(*curNode->v_model_IDs)[i] = model_data[i].hemisphere;
+				}
+			}
 
-            glBindVertexArray(model.mesh_data.mVao);
-            glDrawElements(GL_TRIANGLES, model.mesh_data.mNumIndices, GL_UNSIGNED_INT, 0);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ModelUniformData), &model_data[i].model_uniforms);
 
+            glBindVertexArray(model_data[i].mesh_data.mVao);
+            glDrawElements(GL_TRIANGLES, model_data[i].mesh_data.mNumIndices, GL_UNSIGNED_INT, 0);
 
-            SelectedRegionMatrices[model.region].SetTargetTranslation(glm::translate(pTrackballCam->getDolly())*glm::scale(glm::vec3(10.0f))*glm::translate(-pMesh_spl->GetPoint(0.5f)));
-            SelectedRegionMatrices[model.region].SetTargetRotation(offset*Minterp*S2*T*V*S*M0);
-            SelectedMeshU[model.region] = u;
+            SelectedRegionMatrices[model_data[i].region].SetTargetTranslation(glm::translate(pTrackballCam->getDolly())*glm::scale(glm::vec3(10.0f))*glm::translate(-pMesh_spl->GetPoint(0.5f)));
+            SelectedRegionMatrices[model_data[i].region].SetTargetRotation(offset*Minterp*S2*T*V*S*M0);
+            SelectedMeshU[model_data[i].region] = u;
          }
       }
+
+	  if (renderSections.b_push_mode == true) {
+		  renderSections.push_sectionNode(curNode);
+		  renderSections.b_selected_mode = false;
+		  renderSections.b_push_mode = false;
+	  }
+	  // draw stored sections
+	  renderSections.draw_sections();
    }
 }
+
 
 void DrawPass4() //cube back faces for volume rendering
 {
@@ -526,7 +649,6 @@ void DrawPass4() //cube back faces for volume rendering
    ModelUniformData.M = glm::scale(glm::vec3(1.0f));
    glBindBuffer(GL_UNIFORM_BUFFER, model_uniform_buffer); //Bind the OpenGL UBO before we update the data.
    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(ModelUniformData), &ModelUniformData);
-
 
    //draw pass 1: back faces of mesh to texture
    //set uniforms
@@ -665,8 +787,9 @@ void DrawPass6() //picking
          glDrawElementsInstanced(GL_TRIANGLES, model.mesh_data.mNumIndices, GL_UNSIGNED_INT, 0, model.model_uniforms.instances);
       }
    }
-   
- 
+  
+   renderSections.draw_sections_pick();
+
    //unbind framebuffer object
    glBindFramebuffer(GL_FRAMEBUFFER, vr_fbo);
 
@@ -1083,7 +1206,8 @@ void DrawPass9() //draw bounding boxes
    {
       DrawLeaderLines();
    }
-   
+
+   renderSections.draw_lines();
 
    if(select_mode == SelectMode::Lobe || select_mode == SelectMode::Hemisphere)
    {
@@ -1114,7 +1238,7 @@ void DrawPass9() //draw bounding boxes
          DrawLine(RegionLines[i]);
       }
    }
-   
+
    glDisable(GL_BLEND);
 }
 
@@ -1168,6 +1292,13 @@ void display(glm::mat4& Pvr, glm::mat4& Vvr0, glm::mat4& Mvr0, GLuint fbo)
 	PVvr_last = Pvr*Vvr;
    HMDpose = Mvr0;
    
+   pTrackballCam->setDolly(glm::vec3(temp_location_x,temp_location_y,temp_location_z));
+   for (int i = 0; i < RegionMatrices.size(); i++)
+   {
+	   RegionMatrices[i].SetTargetTranslation(glm::translate(pTrackballCam->getDolly())*glm::scale(glm::vec3(3.0f)));
+	   RegionMatrices[i].SetTargetRotation(M0);
+   }
+
    glm::mat4 V = pTrackballCam->getAccumRotationMatrix()*glm::scale(glm::vec3(1.0f, -1.0f, 1.0f))*glm::rotate(-3.141592f / 2.0f, glm::vec3(0.0f, 0.0f, 1.0f));//HACK why scale -1???
    glm::mat4 Veye = Vvr*V;
 
@@ -1354,7 +1485,8 @@ void InitOpenGL(int w, int h)
    LoadShader();
 
    pTrackballCam = new VirtualTrackball(0.1f, true, false);
-   pTrackballCam->setDolly(glm::vec3(-2.0f, 1.0f, -4.0));
+   //pTrackballCam->setDolly(glm::vec3(-2.0f, 1.0f, -4.0));
+   pTrackballCam->setDolly(glm::vec3(-5.0f, 0.0f, -5.0));
 
    pSceneMeshRotation = new VirtualTrackball(0.1f, true, false);
    pSceneMeshRotation->setDolly(glm::vec3(0.0f));
@@ -1374,6 +1506,13 @@ void InitOpenGL(int w, int h)
    //glBeginQuery(GL_TIME_ELAPSED, TimerQuery);
 
    init_gui();
+   renderSections.init_lines();
+
+   //TEMP
+   SelectedHemisphereIDs.insert(0);
+   SelectedLobeIDs.insert(0);
+   SelectedRegionIDs.insert(0);
+
 }
 
 void LoadAALScene()
@@ -1543,7 +1682,50 @@ void handle_selection(int id, bool single)
 
 }
 
+void handle_selection_sections(pair<int,int> id) {
+	if (id.first < 0 || id.first >= model_data.size())
+	{
+		return;
+	}
 
+	unselect_all();
+	SectionNode* selectedSection = renderSections.get_sectionNode(id.second);
+	renderSections.cur = selectedSection;
+	renderSections.select_id = id.first;
+
+	const int hemisphere = model_data[id.first].hemisphere;
+	const int lobe = model_data[id.first].lobe;
+
+	const int val = model_data[id.first].model_uniforms.selected;
+	const int newval = 1 - val;
+	
+	switch (selectedSection->select_mode) {
+	case SelectMode::Brain:
+		select_all(newval);
+		select_mode = SelectMode::Hemisphere;
+		set_select_mode_colors();
+		break;
+	case SelectMode::Hemisphere:
+		select_hemisphere(hemisphere, newval);
+		select_mode = SelectMode::Lobe;
+		set_select_mode_colors();
+		break;
+	case SelectMode::Lobe:
+		select_lobe(lobe, newval);
+		select_mode = SelectMode::Region;
+		set_select_mode_colors();
+		break;
+	case SelectMode::Region:
+		select_region(id.first, newval);
+		break;
+	}
+}
+
+void handle_push_renderSections() {
+	if (renderSections.b_selected_mode == true) {
+		renderSections.b_push_mode = true;
+	}
+}
 
 void enable_slabs_region(int id, AABB& box, const glm::vec3& dir = glm::vec3(1.0f, 0.0f, 0.0f))
 {
@@ -1663,8 +1845,10 @@ void toggle_slabs(int id)
    }
 }
 
-int pick(int x, int y)
+pair<int,int> pick(int x, int y)
 {
+	pair<int, int> res;
+	int id_section = -1;
    int id = -1;
    GLubyte buffer[4];
 
@@ -1676,12 +1860,18 @@ int pick(int x, int y)
 
    cout << "Picked: " << std::to_string(buffer[0]) << std::to_string(buffer[1]) << std::to_string(buffer[2]) << std::to_string(buffer[3]) << endl;
 
+   renderSections.b_selected_mode = true;
+
    if(buffer[3] > 0)
    {
       id = buffer[2];
+	  id_section = buffer[1];
    }
    last_picked = id;
-   return id;
+
+   res.first = id;
+   res.second = id_section;
+   return res;
 }
 
 int update_manip_slabs() 

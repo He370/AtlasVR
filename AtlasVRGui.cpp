@@ -40,6 +40,16 @@ bool hide_controllers = false;
 bool hide_scene_meshes = false;
 bool enable_slab_popout = false;
 
+//TEMP debug
+
+extern float temp_location_x;
+extern float temp_location_y;
+extern float temp_location_z;
+extern float temp_level_distance;
+void debug_menu();
+
+//  TEMP end
+
 MeshData label_lines;
 
 void view_menu();
@@ -130,6 +140,10 @@ void Draw2dVRGui()
 	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
 	ImGui::SetNextWindowSize(texsize);
 	ImGui::Begin("Debugging", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+		//picking texture image
+	
+	ImGui::ImageButton(ImTextureID(PickID),ImVec2(200,200));
+
       static glm::vec3 dolly;
       dolly = pTrackballCam->getDolly();
       if (ImGui::SliderFloat("dolly", &dolly.x, -10.0f, 10.0f))
@@ -140,6 +154,8 @@ void Draw2dVRGui()
       {
          pTrackballCam->setDolly(dolly);
       }
+
+	  debug_menu();
       
       static bool green_screen = false;
       if (ImGui::Checkbox("Green screen", &green_screen))
@@ -339,4 +355,13 @@ void interaction_menu()
          enable_slabs_region(id, BrainAABB, glm::vec3(0.0f, 0.0f, 1.0f));
       }
    }
+}
+
+void debug_menu() {
+
+	ImGui::SliderFloat("x", &temp_location_x, -10.0f, 10.0f);
+	ImGui::SliderFloat("y", &temp_location_y, -10.0f, 10.0f);
+	ImGui::SliderFloat("z", &temp_location_z, -10.0f, 10.0f);
+	ImGui::SliderFloat("d", &temp_level_distance, -10.0f, 10.0f);
+
 }

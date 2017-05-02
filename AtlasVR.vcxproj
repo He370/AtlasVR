@@ -94,6 +94,7 @@
     <ClCompile Include="glUtils.cpp" />
     <ClCompile Include="HelpImage.cpp" />
     <ClCompile Include="Labels.cpp" />
+    <ClCompile Include="RenderSections.cpp" />
     <ClCompile Include="TrackedCamera.cpp" />
     <ClCompile Include="Tutorial.cpp" />
     <ClCompile Include="Views.cpp" />
@@ -137,6 +138,7 @@
     <ClInclude Include="glUtils.h" />
     <ClInclude Include="HelpImage.h" />
     <ClInclude Include="Labels.h" />
+    <ClInclude Include="RenderSections.h" />
     <ClInclude Include="TrackedCamera.h" />
     <ClInclude Include="Tutorial.h" />
     <ClInclude Include="Views.h" />

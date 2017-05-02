@@ -2,6 +2,7 @@
 #define __BRAINHIERARCHY_H__
 
 #include <vector>
+#include <set>
 #include "uniforms.h"
 #include "Transform.h"
 #include "LoadMesh.h"
@@ -12,7 +13,11 @@ enum SelectMode{ Brain, Hemisphere, Lobe, Region, NumModes };
 extern char* SelectNames[];
 extern int select_mode;
 extern int selected_slab;
+extern std::set<int> SelectedHemisphereIDs;
+extern std::set<int> SelectedLobeIDs;
+extern std::set<int> SelectedRegionIDs;
 
+extern glm::vec4 BrainColor;
 extern std::vector<glm::vec4> HemisphereColors;
 extern std::vector<glm::vec4> LobeColors;
 extern std::vector<glm::vec4> RegionColors;

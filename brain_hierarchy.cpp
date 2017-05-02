@@ -2,12 +2,16 @@
 #include "Color.h"
 #include "Cube.h"
 #include "VirtualTrackball.h"
+#include <set>
 
 extern VirtualTrackball* pTrackballCam;
 
 char* SelectNames[] = { "Brain", "Hemisphere", "Lobe", "Region" };
 int select_mode = SelectMode::Brain;
 int selected_slab = 0;
+std::set<int> SelectedHemisphereIDs;
+std::set<int> SelectedLobeIDs;
+std::set<int> SelectedRegionIDs;
 
 std::vector<AnimTransform> HemisphereMatrices;
 std::vector<AnimTransform> LobeMatrices;

@@ -29,11 +29,13 @@ void draw_pick_pass(glm::mat4& V);
 
 void LoadShader();
 void handle_selection(int id, bool single);
+void handle_selection_sections(std::pair<int,int> id);
+void handle_push_renderSections();
 void toggle_slabs(int id);
 void next_select_mode();
 
 void UpdateAllTransforms(float d_time);
-int pick(int x, int y);
+std::pair<int,int> pick(int x, int y);
 
 static vr::IVRSystem*		g_HMD = 0;
 static glm::vec2 g_AxisPos[2] = { glm::vec2(0.0f, 0.0f), glm::vec2(0.0f, 0.0f) };
@@ -148,13 +150,16 @@ void vr_event_callback(vr::VREvent_t* event)
 		{
 			if (event->eventType == vr::VREvent_ButtonTouch)
 			{
-				int id = pick(PickW / 2, PickH / 2);
-				if (id >= 0)
+				std::pair<int,int> id = pick(PickW / 2, PickH / 2);
+				if (id.first >= 0 && id.second >= 1) {
+					handle_selection_sections(id);
+				}
+				else if (id.first >= 0)
 				{
 					bool pick_single = false;
 					if (pTutorial != nullptr && pTutorial->tutorialMode==true) pick_single = true;
-					handle_selection(id, pick_single);
-					if(pTutorial != nullptr && pTutorial->tutorialMode==true) pTutorial->pickLobe(id);
+					handle_selection(id.first, pick_single);
+					if(pTutorial != nullptr && pTutorial->tutorialMode==true) pTutorial->pickLobe(id.first);
 				}
 
 			}
@@ -170,10 +175,11 @@ void vr_event_callback(vr::VREvent_t* event)
 					toggle_slabs(id);
 				}
             */
-            if (pTutorial->tutorialMode == false)
-            {
-               applySelectedMatrices();
-            }
+				if (pTutorial->tutorialMode == false)
+				{
+					applySelectedMatrices();
+				}
+				handle_push_renderSections();
 			}
 		}
 
